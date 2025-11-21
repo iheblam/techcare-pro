@@ -115,18 +115,12 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <Link to="/profile" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  {user?.profile_picture ? (
-                    <img
-                      src={user.profile_picture}
-                      alt={user.full_name || user.username}
-                      className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                      style={{ aspectRatio: '1/1' }}
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-medium shadow-sm">
-                      {user?.first_name?.[0]}{user?.last_name?.[0]}
-                    </div>
-                  )}
+                  <img
+                    src={user?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.avatar || 'avataaars-1'}`}
+                    alt={user.full_name || user.username}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                    style={{ aspectRatio: '1/1' }}
+                  />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-gray-900">
                       {user?.first_name || user?.username || 'Profile'}
@@ -207,17 +201,11 @@ const Navbar = () => {
                   className="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
                 >
                   <div className="flex items-center space-x-3">
-                    {user?.profile_picture ? (
-                      <img
-                        src={user.profile_picture}
-                        alt={user.full_name || user.username}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-medium">
-                        {user?.first_name?.[0]}{user?.last_name?.[0]}
-                      </div>
-                    )}
+                    <img
+                      src={user?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.avatar || 'avataaars-1'}`}
+                      alt={user.full_name || user.username}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                    />
                     <span>{user?.first_name || user?.username || 'Profile'}</span>
                   </div>
                   {getUserTypeBadge()}
