@@ -9,63 +9,58 @@ import json
 class EmailService:
     """
     Centralized email service for sending notifications
-    Uses Brevo API (HTTPS) instead of SMTP to avoid Railway port blocking
+    Uses Resend API (HTTPS) instead of SMTP to avoid Railway port blocking
     """
     
     @staticmethod
     def send_email_via_api(subject, message, recipient_list, html_message=None):
         """
-        Send email using Brevo API (not blocked by Railway)
+        Send email using Resend API (not blocked by Railway)
         """
         try:
-            # Get Brevo API key from environment
-            api_key = getattr(settings, 'BREVO_API_KEY', None)
+            # Get Resend API key from environment
+            api_key = getattr(settings, 'RESEND_API_KEY', None)
             
             if not api_key:
-                print("BREVO_API_KEY not set, falling back to SMTP")
+                print("RESEND_API_KEY not set, falling back to SMTP")
                 return EmailService.send_email_via_smtp(subject, message, recipient_list, html_message)
             
             # Strip any whitespace from API key
             api_key = api_key.strip()
             
-            print(f"DEBUG: API key length: {len(api_key)}")
-            print(f"DEBUG: API key starts with: {api_key[:20]}...")
-            
-            # Prepare email data for Brevo API
-            url = "https://api.brevo.com/v3/smtp/email"
+            # Prepare email data for Resend API
+            url = "https://api.resend.com/emails"
             headers = {
-                "accept": "application/json",
-                "content-type": "application/json",
-                "api-key": api_key
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
             }
             
-            # Extract sender name and email
-            from_email = settings.DEFAULT_FROM_EMAIL
-            if '<' in from_email and '>' in from_email:
-                sender_name = from_email.split('<')[0].strip()
-                sender_email = from_email.split('<')[1].strip('>')
-            else:
-                sender_name = "TechCare"
-                sender_email = from_email
+            # Extract sender email (use Resend's test domain for now)
+            sender_email = "onboarding@resend.dev"  # Resend's test domain (no verification needed)
+            
+            # Build recipient list
+            to_emails = recipient_list if isinstance(recipient_list, list) else [recipient_list]
             
             payload = {
-                "sender": {"name": sender_name, "email": sender_email},
-                "to": [{"email": email} for email in recipient_list],
+                "from": f"TechCare Pro <{sender_email}>",
+                "to": to_emails,
                 "subject": subject,
-                "textContent": message,
             }
             
+            # Add HTML or text content
             if html_message:
-                payload["htmlContent"] = html_message
+                payload["html"] = html_message
+            else:
+                payload["text"] = message
             
-            print(f"Sending email via Brevo API to: {recipient_list}")
-            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            print(f"Sending email via Resend API to: {to_emails}")
+            response = requests.post(url, headers=headers, json=payload)
             
             if response.status_code in [200, 201]:
-                print(f"Email sent successfully via API to: {recipient_list}")
+                print(f"Email sent successfully via Resend API to: {to_emails}")
                 return True
             else:
-                print(f"Brevo API error: {response.status_code} - {response.text}")
+                print(f"Resend API error: {response.status_code} - {response.text}")
                 return False
                 
         except Exception as e:
