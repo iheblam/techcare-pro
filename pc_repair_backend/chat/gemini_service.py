@@ -15,7 +15,7 @@ class GeminiChatService:
         # Primary model: Gemini 2.0 Flash (experimental, latest features)
         self.primary_model = genai.GenerativeModel('gemini-2.0-flash-exp')
         # Fallback model: Gemini 1.5 Flash (stable, higher quota)
-        self.fallback_model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        self.fallback_model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Track which model is currently in use
         self.current_model = self.primary_model
@@ -107,7 +107,7 @@ Your response (be helpful, clear, and step-by-step):"""
                     if self.current_model == self.primary_model:
                         print(f"Gemini 2.0 quota exceeded, switching to stable Gemini 1.5 Flash...")
                         self.current_model = self.fallback_model
-                        self.model_name = 'gemini-1.5-flash-latest'
+                        self.model_name = 'gemini-1.5-flash'
                         
                         try:
                             # Retry with fallback model
