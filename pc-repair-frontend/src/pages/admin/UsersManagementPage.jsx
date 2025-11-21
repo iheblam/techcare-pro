@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Users, Search, Trash2, Eye, Shield, UserCheck, Clock, X } from 'lucide-react';
+import { Users, Search, Trash2, Eye, Shield, UserCheck, Clock, X, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import MainLayout from '../../components/layout/MainLayout';
 import api from '../../services/api';
 import Alert from '../../components/common/Alert';
 import { Badge } from '../../components/common/Badge';
 
 const UsersManagementPage = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,99 +130,113 @@ const UsersManagementPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <MainLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {alert && <Alert type={alert.type} message={alert.message} />}
+    <MainLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          {alert && <Alert type={alert.type} message={alert.message} />}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Users className="h-8 w-8 text-blue-600" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600">Manage all system users</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-blue-600">{Array.isArray(users) ? users.length : 0}</div>
-          <div className="text-sm text-gray-600">Total Users</div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+          {/* Header with Back Button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/admin')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Back to Admin Dashboard"
+              >
+                <ArrowLeft className="h-6 w-6 text-gray-600" />
+              </button>
+              <div className="flex items-center space-x-3">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+                  <p className="text-sm text-gray-600">Manage all system users</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white px-6 py-3 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-sm text-gray-600">Total Users</div>
+              <div className="text-2xl font-bold text-blue-600">{Array.isArray(users) ? users.length : 0}</div>
+            </div>
           </div>
 
-          {/* User Type Filter */}
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">All User Types</option>
-            <option value="customer">Customers</option>
-            <option value="technician">Technicians</option>
-            <option value="admin">Admins</option>
-          </select>
+          {/* Filters */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
 
-          {/* Status Filter */}
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
+              {/* User Type Filter */}
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="all">All User Types</option>
+                <option value="customer">Customers</option>
+                <option value="technician">Technicians</option>
+                <option value="admin">Admins</option>
+              </select>
 
-        {/* Stats */}
-        <div className="flex space-x-4 text-sm">
-          <div className="text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{Array.isArray(filteredUsers) ? filteredUsers.length : 0}</span> of{' '}
-            <span className="font-semibold text-gray-900">{Array.isArray(users) ? users.length : 0}</span> users
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                Showing <span className="font-semibold text-gray-900">{Array.isArray(filteredUsers) ? filteredUsers.length : 0}</span> of{' '}
+                <span className="font-semibold text-gray-900">{Array.isArray(users) ? users.length : 0}</span> users
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Users Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Joined
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+          {/* Users Table */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Joined
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                 </th>
               </tr>
             </thead>
@@ -287,10 +304,10 @@ const UsersManagementPage = () => {
         </div>
       </div>
 
-      {/* User Detail Modal */}
-      {showDetailModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          {/* User Detail Modal */}
+          {showDetailModal && selectedUser && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               {/* Header */}
               <div className="flex justify-between items-start mb-6">
@@ -489,7 +506,9 @@ const UsersManagementPage = () => {
           </div>
         </div>
       )}
-    </div>
+        </div>
+      </div>
+    </MainLayout>
   );
 };
 
