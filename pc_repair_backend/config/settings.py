@@ -256,7 +256,7 @@ if not DEBUG:
 
 
 
-# Email Configuration - Brevo (Sendinblue) SMTP
+# Email Configuration - Brevo (Sendinblue) API
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='smtp-relay.brevo.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
@@ -267,3 +267,6 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='TechCare Support <iheblamouchi.ih@gmail.com>')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# Brevo API key for HTTP API (bypasses Railway SMTP port blocking)
+BREVO_API_KEY = config('BREVO_API_KEY', default='')

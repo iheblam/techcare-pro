@@ -2,43 +2,97 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.html import strip_tags
+import requests
+import json
 
 
 class EmailService:
     """
     Centralized email service for sending notifications
+    Uses Brevo API (HTTPS) instead of SMTP to avoid Railway port blocking
     """
     
     @staticmethod
-    def send_email(subject, message, recipient_list, html_message=None):
+    def send_email_via_api(subject, message, recipient_list, html_message=None):
         """
-        Send email helper function
+        Send email using Brevo API (not blocked by Railway)
         """
         try:
-            print(f"=== EMAIL DEBUG ===")
-            print(f"SMTP Host: {settings.EMAIL_HOST}")
-            print(f"SMTP Port: {settings.EMAIL_PORT}")
-            print(f"SMTP User: {settings.EMAIL_HOST_USER}")
-            print(f"SMTP Password: {'*' * len(settings.EMAIL_HOST_PASSWORD) if settings.EMAIL_HOST_PASSWORD else 'NOT SET'}")
-            print(f"Attempting to send email to: {recipient_list}")
-            print(f"From: {settings.DEFAULT_FROM_EMAIL}")
-            print(f"==================")
+            # Get Brevo API key from environment
+            api_key = getattr(settings, 'BREVO_API_KEY', None)
+            
+            if not api_key:
+                print("BREVO_API_KEY not set, falling back to SMTP")
+                return EmailService.send_email_via_smtp(subject, message, recipient_list, html_message)
+            
+            # Prepare email data for Brevo API
+            url = "https://api.brevo.com/v3/smtp/email"
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "api-key": api_key
+            }
+            
+            # Extract sender name and email
+            from_email = settings.DEFAULT_FROM_EMAIL
+            if '<' in from_email and '>' in from_email:
+                sender_name = from_email.split('<')[0].strip()
+                sender_email = from_email.split('<')[1].strip('>')
+            else:
+                sender_name = "TechCare"
+                sender_email = from_email
+            
+            payload = {
+                "sender": {"name": sender_name, "email": sender_email},
+                "to": [{"email": email} for email in recipient_list],
+                "subject": subject,
+                "textContent": message,
+            }
+            
+            if html_message:
+                payload["htmlContent"] = html_message
+            
+            print(f"Sending email via Brevo API to: {recipient_list}")
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            
+            if response.status_code in [200, 201]:
+                print(f"Email sent successfully via API to: {recipient_list}")
+                return True
+            else:
+                print(f"Brevo API error: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Email API sending failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    @staticmethod
+    def send_email_via_smtp(subject, message, recipient_list, html_message=None):
+        """
+        Fallback SMTP method
+        """
+        try:
             send_mail(
                 subject=subject,
                 message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=recipient_list,
                 html_message=html_message,
-                fail_silently=False,  # Changed to False to see errors
+                fail_silently=True,
             )
-            print(f"Email sent successfully to: {recipient_list}")
             return True
         except Exception as e:
-            print(f"Email sending failed: {str(e)}")
-            print(f"Error type: {type(e).__name__}")
-            import traceback
-            traceback.print_exc()
+            print(f"SMTP sending failed: {str(e)}")
             return False
+    
+    @staticmethod
+    def send_email(subject, message, recipient_list, html_message=None):
+        """
+        Send email helper function - tries API first, falls back to SMTP
+        """
+        return EmailService.send_email_via_api(subject, message, recipient_list, html_message)
     
     @staticmethod
     def send_welcome_email(user):
