@@ -12,10 +12,10 @@ class GeminiChatService:
     """
     
     def __init__(self):
-        # Primary model: Gemini 2.0 Flash (experimental, latest features)
+        # Primary model: Gemini 2.0 Flash (experimental, fast)
         self.primary_model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        # Fallback model: Gemini 1.5 Flash (stable, higher quota)
-        self.fallback_model = genai.GenerativeModel('gemini-1.5-flash')
+        # Fallback model: Also Gemini 2.0 Flash (same model, retry after cooldown)
+        self.fallback_model = genai.GenerativeModel('gemini-2.0-flash-exp')
         
         # Track which model is currently in use
         self.current_model = self.primary_model
@@ -103,32 +103,8 @@ Your response (be helpful, clear, and step-by-step):"""
                 
                 # Check if it's a quota/rate limit error (429 or quota exceeded)
                 if "429" in error_str or "quota" in error_str.lower() or "rate limit" in error_str.lower():
-                    # Switch to fallback model
-                    if self.current_model == self.primary_model:
-                        print(f"Gemini 2.0 quota exceeded, switching to stable Gemini 1.5 Flash...")
-                        self.current_model = self.fallback_model
-                        self.model_name = 'gemini-1.5-flash'
-                        
-                        try:
-                            # Retry with fallback model
-                            response = self.current_model.generate_content(full_prompt)
-                            ai_response = response.text
-                            ai_response = f"ℹ️ *Using stable Gemini 1.5 Flash*\n\n{ai_response}"
-                        except Exception as fallback_error:
-                            # Both models failed
-                            raise Exception(f"Both AI models unavailable. Primary: {error_str[:100]}, Fallback: {str(fallback_error)[:100]}")
-                    else:
-                        # Already on fallback, try switching back to primary
-                        print(f"Gemini 1.5 quota exceeded, trying Gemini 2.0 again...")
-                        self.current_model = self.primary_model
-                        self.model_name = 'gemini-2.0-flash-exp'
-                        
-                        try:
-                            response = self.current_model.generate_content(full_prompt)
-                            ai_response = response.text
-                        except:
-                            # Both models exhausted
-                            raise Exception("AI service temporarily unavailable due to high usage. Please try again in a few moments or speak with a human technician.")
+                    # Quota exceeded - inform user to try again later or use human technician
+                    raise Exception("AI service temporarily at capacity. Please wait a moment and try again, or speak with a human technician for immediate assistance.")
                 else:
                     # Non-quota error, re-raise
                     raise primary_error
