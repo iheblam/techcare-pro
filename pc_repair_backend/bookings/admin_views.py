@@ -43,6 +43,23 @@ class AdminDashboardStatsView(APIView):
             technician_profile__is_approved=True
         ).count()
         
+        # Get available technicians for ticket assignment (approved + admin)
+        available_technicians = User.objects.filter(
+            Q(user_type='technician', technician_profile__is_approved=True) |
+            Q(user_type='admin')
+        ).annotate(
+            active_tickets=Count('technician_tickets', filter=Q(technician_tickets__status__in=['assigned', 'in_progress']))
+        ).values('id', 'first_name', 'last_name', 'active_tickets')
+        
+        technicians_list = [
+            {
+                'id': tech['id'],
+                'name': f"{tech['first_name']} {tech['last_name']}".strip() or 'User',
+                'active_tickets': tech['active_tickets']
+            }
+            for tech in available_technicians
+        ]
+        
         # Issue library statistics
         total_resolved_issues = ResolvedIssue.objects.count()
         ai_resolved = ResolvedIssue.objects.filter(resolved_by='ai').count()
@@ -77,6 +94,7 @@ class AdminDashboardStatsView(APIView):
                 'total_technicians': total_technicians,
                 'approved_technicians': approved_technicians
             },
+            'technicians': technicians_list,  # Add available technicians list
             'issue_library': {
                 'total': total_resolved_issues,
                 'ai_resolved': ai_resolved,
