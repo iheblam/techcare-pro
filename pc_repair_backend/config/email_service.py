@@ -21,7 +21,7 @@ class EmailService:
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=recipient_list,
                 html_message=html_message,
-                fail_silently=False,
+                fail_silently=True,  # Don't crash if email fails
             )
             return True
         except Exception as e:
