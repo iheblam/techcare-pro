@@ -225,7 +225,8 @@ GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 
 # Security Settings for Production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # Railway handles HTTPS, so we don't need Django to redirect
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
