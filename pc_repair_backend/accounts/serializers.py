@@ -96,11 +96,8 @@ class UserSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         """Generate avatar URL - logo for admin, DiceBear for others"""
         if obj.user_type == 'admin':
-            # Return logo URL for admin users
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri('/logo.jpg')
-            return '/logo.jpg'
+            # Return frontend logo URL for admin users
+            return 'https://techcare-pro.vercel.app/logo.jpg'
         else:
             # Generate avatar from DiceBear API for regular users
             avatar_id = obj.avatar or 'avataaars-1'
