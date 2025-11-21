@@ -71,7 +71,6 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer for user profile
     """
     full_name = serializers.SerializerMethodField()
-    profile_picture = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -92,13 +91,16 @@ class UserSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip()
     
-    def get_profile_picture(self, obj):
-        if obj.profile_picture:
+    def to_representation(self, instance):
+        """Convert profile_picture to absolute URL for responses"""
+        data = super().to_representation(instance)
+        if instance.profile_picture:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.profile_picture.url)
-            return obj.profile_picture.url
-        return None
+                data['profile_picture'] = request.build_absolute_uri(instance.profile_picture.url)
+            else:
+                data['profile_picture'] = instance.profile_picture.url
+        return data
 
 
 class TechnicianProfileSerializer(serializers.ModelSerializer):
