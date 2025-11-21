@@ -116,19 +116,21 @@ const ProfilePage = () => {
               <img
                 src={user?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.avatar || 'avataaars-1'}`}
                 alt={user?.full_name}
-                className="w-24 h-24 rounded-full object-cover shadow-lg cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setShowAvatarPicker(true)}
-                title="Click to change avatar"
+                className={`w-24 h-24 rounded-full object-cover shadow-lg ${!isAdmin ? 'cursor-pointer hover:opacity-80' : ''} transition-opacity`}
+                onClick={() => !isAdmin && setShowAvatarPicker(true)}
+                title={!isAdmin ? "Click to change avatar" : "Admin logo"}
               />
               
-              {/* Edit Icon */}
-              <button
-                onClick={() => setShowAvatarPicker(true)}
-                className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-                title="Change avatar"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
+              {/* Edit Icon - only show for non-admin users */}
+              {!isAdmin && (
+                <button
+                  onClick={() => setShowAvatarPicker(true)}
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+                  title="Change avatar"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* User Info */}
