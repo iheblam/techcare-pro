@@ -29,23 +29,34 @@ const UsersManagementPage = () => {
     try {
       setLoading(true);
       const response = await api.get('/auth/admin/users/');
-      setUsers(response.data);
+      // Handle both array and paginated response formats
+      const userData = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data.results || []);
+      setUsers(userData);
     } catch (error) {
       showAlert('error', 'Failed to fetch users: ' + (error.response?.data?.error || error.message));
+      setUsers([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
   };
 
   const filterUsers = () => {
+    // Ensure users is an array
+    if (!Array.isArray(users)) {
+      setFilteredUsers([]);
+      return;
+    }
+
     let filtered = users;
 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(user =>
-        user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -136,7 +147,7 @@ const UsersManagementPage = () => {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-blue-600">{users.length}</div>
+          <div className="text-2xl font-bold text-blue-600">{Array.isArray(users) ? users.length : 0}</div>
           <div className="text-sm text-gray-600">Total Users</div>
         </div>
       </div>
@@ -183,8 +194,8 @@ const UsersManagementPage = () => {
         {/* Stats */}
         <div className="flex space-x-4 text-sm">
           <div className="text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{filteredUsers.length}</span> of{' '}
-            <span className="font-semibold text-gray-900">{users.length}</span> users
+            Showing <span className="font-semibold text-gray-900">{Array.isArray(filteredUsers) ? filteredUsers.length : 0}</span> of{' '}
+            <span className="font-semibold text-gray-900">{Array.isArray(users) ? users.length : 0}</span> users
           </div>
         </div>
       </div>
@@ -213,10 +224,10 @@ const UsersManagementPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.length === 0 ? (
+              {!Array.isArray(filteredUsers) || filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                    No users found matching your filters
+                    {!Array.isArray(filteredUsers) ? 'Error loading users' : 'No users found matching your filters'}
                   </td>
                 </tr>
               ) : (
