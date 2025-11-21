@@ -12,14 +12,14 @@ class GeminiChatService:
     """
     
     def __init__(self):
-        # Primary model: Gemini 1.5 Flash (faster, more quota)
-        self.primary_model = genai.GenerativeModel('gemini-1.5-flash')
-        # Fallback model: Gemini 1.5 Pro (higher quality, separate quota)
-        self.fallback_model = genai.GenerativeModel('gemini-1.5-pro')
+        # Primary model: Gemini 2.0 Flash (experimental, latest features)
+        self.primary_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        # Fallback model: Gemini 1.5 Flash (stable, higher quota)
+        self.fallback_model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         # Track which model is currently in use
         self.current_model = self.primary_model
-        self.model_name = 'gemini-1.5-flash'
+        self.model_name = 'gemini-2.0-flash-exp'
         
         # System instruction for PC repair assistant
         self.system_instruction = """You are an expert PC repair assistant helping users diagnose and fix computer problems.
@@ -105,23 +105,23 @@ Your response (be helpful, clear, and step-by-step):"""
                 if "429" in error_str or "quota" in error_str.lower() or "rate limit" in error_str.lower():
                     # Switch to fallback model
                     if self.current_model == self.primary_model:
-                        print(f"Primary model quota exceeded, switching to fallback model...")
+                        print(f"Gemini 2.0 quota exceeded, switching to stable Gemini 1.5 Flash...")
                         self.current_model = self.fallback_model
-                        self.model_name = 'gemini-1.5-pro'
+                        self.model_name = 'gemini-1.5-flash-latest'
                         
                         try:
                             # Retry with fallback model
                             response = self.current_model.generate_content(full_prompt)
                             ai_response = response.text
-                            ai_response = f"ℹ️ *Using Gemini 1.5 Pro (enhanced mode)*\n\n{ai_response}"
+                            ai_response = f"ℹ️ *Using stable Gemini 1.5 Flash*\n\n{ai_response}"
                         except Exception as fallback_error:
                             # Both models failed
                             raise Exception(f"Both AI models unavailable. Primary: {error_str[:100]}, Fallback: {str(fallback_error)[:100]}")
                     else:
                         # Already on fallback, try switching back to primary
-                        print(f"Fallback model quota exceeded, trying primary model...")
+                        print(f"Gemini 1.5 quota exceeded, trying Gemini 2.0 again...")
                         self.current_model = self.primary_model
-                        self.model_name = 'gemini-1.5-flash'
+                        self.model_name = 'gemini-2.0-flash-exp'
                         
                         try:
                             response = self.current_model.generate_content(full_prompt)
@@ -249,8 +249,8 @@ Technical Summary:"""
         Reset to primary model (useful after quota cooldown)
         """
         self.current_model = self.primary_model
-        self.model_name = 'gemini-1.5-flash'
-        print("Reset to primary model: gemini-1.5-flash")
+        self.model_name = 'gemini-2.0-flash-exp'
+        print("Reset to primary model: gemini-2.0-flash-exp")
     
     def suggest_solution_from_library(self, user_problem: str):
         """
