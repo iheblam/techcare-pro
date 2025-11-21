@@ -201,7 +201,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5174",  # Vite alternate port
     "http://127.0.0.1:5174",
-    "https://techcare-2djqlxaxc-iheb-lamouchis-projects.vercel.app",  # Vercel production
+    "https://techcare-2djqlxaxc-iheb-lamouchis-projects.vercel.app",  # Vercel production (deployment URL)
+    "https://techcare-pro.vercel.app",  # Vercel production (custom domain)
 ]
 
 CORS_ALLOW_CREDENTIALS = True
