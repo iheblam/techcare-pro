@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Search, Trash2, Eye, Shield, UserCheck, Clock, X } from 'lucide-react';
 import api from '../../services/api';
 import Alert from '../../components/common/Alert';
-import Badge from '../../components/common/Badge';
+import { Badge } from '../../components/common/Badge';
 
 const UsersManagementPage = () => {
   const [users, setUsers] = useState([]);
