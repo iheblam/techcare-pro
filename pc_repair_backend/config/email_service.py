@@ -15,17 +15,23 @@ class EmailService:
         Send email helper function
         """
         try:
+            print(f"Attempting to send email to: {recipient_list}")
+            print(f"From: {settings.DEFAULT_FROM_EMAIL}")
             send_mail(
                 subject=subject,
                 message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=recipient_list,
                 html_message=html_message,
-                fail_silently=True,  # Don't crash if email fails
+                fail_silently=False,  # Changed to False to see errors
             )
+            print(f"Email sent successfully to: {recipient_list}")
             return True
         except Exception as e:
             print(f"Email sending failed: {str(e)}")
+            print(f"Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
             return False
     
     @staticmethod
