@@ -303,7 +303,7 @@ New Status: {new_status.replace('_', ' ').title()}
 {f'Technician: {ticket.assigned_technician.get_full_name()}' if ticket.assigned_technician else ''}
 {f'Final Cost: ${ticket.final_cost}' if ticket.final_cost and new_status == 'waiting_payment' else ''}
 
-{f'Technician Notes:\\n{ticket.technician_notes}' if ticket.technician_notes else ''}
+{'Technician Notes:' + chr(10) + ticket.technician_notes if ticket.technician_notes else ''}
 
 You can view full details and updates in your dashboard.
 
