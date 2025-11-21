@@ -17,10 +17,10 @@ class User(AbstractUser):
         default='client'
     )
     phone = models.CharField(max_length=20, blank=True)
-    profile_picture = models.ImageField(
-        upload_to='profiles/', 
-        null=True, 
-        blank=True
+    avatar = models.CharField(
+        max_length=50,
+        default='avataaars-1',
+        help_text='Avatar identifier for profile picture'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

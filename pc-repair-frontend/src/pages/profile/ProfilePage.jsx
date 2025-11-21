@@ -1,26 +1,41 @@
-import React, { useState, useRef } from 'react';
-import { User, Mail, Phone, Shield, Edit, Save, X, Camera, Upload } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Mail, Phone, Shield, Edit, Save, X } from 'lucide-react';
 import MainLayout from '../../components/layout/MainLayout';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { Badge } from '../../components/common/Badge';
 import { useAuth } from '../../context/AuthContext';
-import { formatDate, handleApiError } from '../../utils/helpers';
-import { authAPI } from '../../services/apiService';
+import { formatDate } from '../../utils/helpers';
 import toast from 'react-hot-toast';
 
+// Avatar options using DiceBear API
+const AVATAR_OPTIONS = [
+  { id: 'avataaars-1', label: 'Male 1' },
+  { id: 'avataaars-2', label: 'Male 2' },
+  { id: 'avataaars-3', label: 'Male 3' },
+  { id: 'avataaars-4', label: 'Male 4' },
+  { id: 'avataaars-5', label: 'Male 5' },
+  { id: 'avataaars-6', label: 'Male 6' },
+  { id: 'avataaars-7', label: 'Female 1' },
+  { id: 'avataaars-8', label: 'Female 2' },
+  { id: 'avataaars-9', label: 'Female 3' },
+  { id: 'avataaars-10', label: 'Female 4' },
+  { id: 'avataaars-11', label: 'Female 5' },
+  { id: 'avataaars-12', label: 'Female 6' },
+];
+
 const ProfilePage = () => {
-  const { user, updateProfile, isAdmin, isTechnician, isClient, refreshUser } = useAuth();
+  const { user, updateProfile, isAdmin, isTechnician, isClient } = useAuth();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const fileInputRef = useRef(null);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [formData, setFormData] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
     phone: user?.phone || '',
     email: user?.email || '',
+    avatar: user?.avatar || 'avataaars-1',
   });
 
   const handleChange = (e) => {
@@ -36,6 +51,7 @@ const ProfilePage = () => {
     const success = await updateProfile(formData);
     if (success) {
       setEditing(false);
+      toast.success('Profile updated successfully!');
     }
     setLoading(false);
   };
@@ -46,39 +62,20 @@ const ProfilePage = () => {
       last_name: user?.last_name || '',
       phone: user?.phone || '',
       email: user?.email || '',
+      avatar: user?.avatar || 'avataaars-1',
     });
     setEditing(false);
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
+  const handleAvatarSelect = async (avatarId) => {
+    setLoading(true);
+    const success = await updateProfile({ avatar: avatarId });
+    if (success) {
+      setFormData({ ...formData, avatar: avatarId });
+      setShowAvatarPicker(false);
+      toast.success('Avatar updated successfully!');
     }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB');
-      return;
-    }
-
-    setUploadingImage(true);
-    try {
-      const formData = new FormData();
-      formData.append('profile_picture', file);
-
-      await authAPI.updateProfile(formData);
-      await refreshUser();
-      toast.success('Profile picture updated successfully!');
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setUploadingImage(false);
-    }
+    setLoading(false);
   };
 
   const getUserTypeBadge = () => {
@@ -116,38 +113,22 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Avatar */}
             <div className="relative">
-              {user?.profile_picture ? (
-                <img
-                  src={user.profile_picture}
-                  alt={user.full_name}
-                  className="w-24 h-24 rounded-full object-cover shadow-lg"
-                />
-              ) : (
-                <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${getUserTypeColor()} flex items-center justify-center text-white text-3xl font-bold shadow-lg`}>
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
-                </div>
-              )}
-              
-              {/* Upload Button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingImage}
-                className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors disabled:opacity-50"
-                title="Change profile picture"
-              >
-                {uploadingImage ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Camera className="w-4 h-4" />
-                )}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
+              <img
+                src={user?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.avatar || 'avataaars-1'}`}
+                alt={user?.full_name}
+                className="w-24 h-24 rounded-full object-cover shadow-lg cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setShowAvatarPicker(true)}
+                title="Click to change avatar"
               />
+              
+              {/* Edit Icon */}
+              <button
+                onClick={() => setShowAvatarPicker(true)}
+                className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+                title="Change avatar"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
             </div>
 
             {/* User Info */}
@@ -295,6 +276,54 @@ const ProfilePage = () => {
             </div>
           )}
         </Card>
+
+        {/* Avatar Picker Modal */}
+        {showAvatarPicker && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Choose Your Avatar</h3>
+                  <button
+                    onClick={() => setShowAvatarPicker(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                  {AVATAR_OPTIONS.map((avatar) => (
+                    <button
+                      key={avatar.id}
+                      onClick={() => handleAvatarSelect(avatar.id)}
+                      disabled={loading}
+                      className={`relative p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                        (user?.avatar || formData.avatar) === avatar.id
+                          ? 'border-primary-600 bg-primary-50'
+                          : 'border-gray-200 hover:border-primary-300'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      <img
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatar.id}`}
+                        alt={avatar.label}
+                        className="w-full h-auto rounded-lg"
+                      />
+                      <p className="text-xs text-center mt-2 font-medium text-gray-700">
+                        {avatar.label}
+                      </p>
+                      {(user?.avatar || formData.avatar) === avatar.id && (
+                        <div className="absolute top-1 right-1 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

@@ -71,6 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer for user profile
     """
     full_name = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -83,7 +84,8 @@ class UserSerializer(serializers.ModelSerializer):
             'full_name',
             'phone', 
             'user_type', 
-            'profile_picture',
+            'avatar',
+            'avatar_url',
             'created_at'
         ]
         read_only_fields = ['id', 'username', 'user_type', 'created_at']
@@ -91,16 +93,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip()
     
-    def to_representation(self, instance):
-        """Convert profile_picture to absolute URL for responses"""
-        data = super().to_representation(instance)
-        if instance.profile_picture:
-            request = self.context.get('request')
-            if request:
-                data['profile_picture'] = request.build_absolute_uri(instance.profile_picture.url)
-            else:
-                data['profile_picture'] = instance.profile_picture.url
-        return data
+    def get_avatar_url(self, obj):
+        """Generate avatar URL from DiceBear API"""
+        avatar_id = obj.avatar or 'avataaars-1'
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={avatar_id}"
 
 
 class TechnicianProfileSerializer(serializers.ModelSerializer):
