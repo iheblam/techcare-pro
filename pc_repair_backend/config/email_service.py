@@ -15,8 +15,14 @@ class EmailService:
         Send email helper function
         """
         try:
+            print(f"=== EMAIL DEBUG ===")
+            print(f"SMTP Host: {settings.EMAIL_HOST}")
+            print(f"SMTP Port: {settings.EMAIL_PORT}")
+            print(f"SMTP User: {settings.EMAIL_HOST_USER}")
+            print(f"SMTP Password: {'*' * len(settings.EMAIL_HOST_PASSWORD) if settings.EMAIL_HOST_PASSWORD else 'NOT SET'}")
             print(f"Attempting to send email to: {recipient_list}")
             print(f"From: {settings.DEFAULT_FROM_EMAIL}")
+            print(f"==================")
             send_mail(
                 subject=subject,
                 message=message,
