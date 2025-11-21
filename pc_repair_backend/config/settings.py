@@ -204,8 +204,27 @@ CORS_ALLOWED_ORIGINS = [
     "https://techcare-2djqlxaxc-iheb-lamouchis-projects.vercel.app",  # Vercel production (deployment URL)
     "https://techcare-pro.vercel.app",  # Vercel production (custom domain)
 ]
-
+    
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 # Media Files (uploads)
 MEDIA_URL = '/media/'
