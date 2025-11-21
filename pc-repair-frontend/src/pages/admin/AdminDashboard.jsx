@@ -143,6 +143,49 @@ const AdminDashboard = () => {
           })}
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Link to="/admin/tickets">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="flex items-center space-x-4">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <Ticket className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Manage Tickets</h3>
+                  <p className="text-sm text-gray-600">View and assign tickets</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+          <Link to="/admin/applications">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="flex items-center space-x-4">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Technician Applications</h3>
+                  <p className="text-sm text-gray-600">Review applications</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+          <Link to="/admin/users">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="flex items-center space-x-4">
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <Users className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">User Management</h3>
+                  <p className="text-sm text-gray-600">Manage all users</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+        </div>
+
         {/* Pending Tickets */}
         <Card>
           <div className="flex items-center justify-between mb-6">

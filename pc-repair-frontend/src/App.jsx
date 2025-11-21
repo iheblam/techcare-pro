@@ -17,6 +17,7 @@ import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminTicketsPage from './pages/admin/AdminTicketsPage';
 import AdminApplicationsPage from './pages/admin/AdminApplicationsPage';
+import UsersManagementPage from './pages/admin/UsersManagementPage';
 import TechnicianDashboard from './pages/technician/TechnicianDashboard';
 import TechnicianApplicationForm from './pages/technician/TechnicianApplicationForm';
 import ApplicationStatus from './pages/technician/ApplicationStatus';
@@ -114,6 +115,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminApplicationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requireAdmin>
+                <UsersManagementPage />
               </ProtectedRoute>
             }
           />
