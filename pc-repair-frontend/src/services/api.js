@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Ensure API_URL always ends with /api
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = baseURL.endsWith('/api') ? baseURL : `${baseURL}/api`;
 
 // Create axios instance
 const api = axios.create({
