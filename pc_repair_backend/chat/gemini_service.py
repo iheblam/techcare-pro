@@ -103,10 +103,12 @@ Your response (be helpful, clear, and step-by-step):"""
                 
                 # Check if it's a quota/rate limit error (429 or quota exceeded)
                 if "429" in error_str or "quota" in error_str.lower() or "rate limit" in error_str.lower():
-                    # Quota exceeded - inform user to try again later or use human technician
-                    raise Exception("AI service temporarily at capacity. Please wait a moment and try again, or speak with a human technician for immediate assistance.")
+                    # Quota exceeded - inform user with detailed error
+                    print(f"GEMINI QUOTA ERROR: {error_str[:200]}")
+                    raise Exception(f"AI quota exceeded. Error details: {error_str[:150]}... Please try again later or speak with a technician.")
                 else:
-                    # Non-quota error, re-raise
+                    # Non-quota error, re-raise with details
+                    print(f"GEMINI API ERROR: {error_str[:200]}")
                     raise primary_error
             
             if not ai_response:
