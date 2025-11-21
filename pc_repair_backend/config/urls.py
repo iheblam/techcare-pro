@@ -17,6 +17,6 @@ urlpatterns = [
     path('api/tickets/', include('bookings.urls')),
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files (in both development and production for Railway)
+# Railway/Gunicorn will handle media files through Django
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
