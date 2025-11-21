@@ -256,14 +256,14 @@ if not DEBUG:
 
 
 
-# Email Configuration
+# Email Configuration - Brevo (Sendinblue) SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = config('EMAIL_HOST', default='smtp-relay.brevo.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_TIMEOUT = 10  # Reduce timeout to fail faster
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='iheblamouchi.ih@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='hmrm vxbi ilwp cojb')
+EMAIL_TIMEOUT = 10
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='TechCare Support <iheblamouchi.ih@gmail.com>')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
