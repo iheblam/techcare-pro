@@ -12,6 +12,11 @@ from .views import (
     AdminTechnicianApplicationsView,
     ReviewTechnicianApplicationView
 )
+from .admin_views import (
+    AdminUsersListView,
+    AdminUserDetailView,
+    AdminUserStatsView
+)
 
 app_name = 'accounts'
 
@@ -34,4 +39,9 @@ urlpatterns = [
     path('technician-application/my-application/', MyTechnicianApplicationView.as_view(), name='my_application'),
     path('admin/technician-applications/', AdminTechnicianApplicationsView.as_view(), name='admin_applications'),
     path('admin/technician-applications/<int:application_id>/review/', ReviewTechnicianApplicationView.as_view(), name='review_application'),
+    
+    # Admin User Management
+    path('admin/users/', AdminUsersListView.as_view(), name='admin_users_list'),
+    path('admin/users/stats/', AdminUserStatsView.as_view(), name='admin_users_stats'),
+    path('admin/users/<int:user_id>/', AdminUserDetailView.as_view(), name='admin_user_detail'),
 ]
