@@ -369,10 +369,10 @@ const AdminTicketsPage = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {ticket.assigned_technician_name ? (
+                          {ticket.technician_name ? (
                             <span className="flex items-center">
                               <UserCheck className="w-4 h-4 mr-1 text-green-600" />
-                              {ticket.assigned_technician_name}
+                              {ticket.technician_name}
                             </span>
                           ) : (
                             <span className="text-gray-400">Unassigned</span>
