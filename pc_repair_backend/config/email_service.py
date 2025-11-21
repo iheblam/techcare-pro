@@ -25,6 +25,12 @@ class EmailService:
                 print("BREVO_API_KEY not set, falling back to SMTP")
                 return EmailService.send_email_via_smtp(subject, message, recipient_list, html_message)
             
+            # Strip any whitespace from API key
+            api_key = api_key.strip()
+            
+            print(f"DEBUG: API key length: {len(api_key)}")
+            print(f"DEBUG: API key starts with: {api_key[:20]}...")
+            
             # Prepare email data for Brevo API
             url = "https://api.brevo.com/v3/smtp/email"
             headers = {
