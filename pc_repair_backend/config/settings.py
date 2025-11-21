@@ -33,7 +33,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,techcare-pro-production.up.railway.app').split(',')
 
 
 # Application definition
@@ -201,6 +201,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5174",  # Vite alternate port
     "http://127.0.0.1:5174",
+    "https://techcare-2djqlxaxc-iheb-lamouchis-projects.vercel.app",  # Vercel production
 ]
 
 CORS_ALLOW_CREDENTIALS = True
