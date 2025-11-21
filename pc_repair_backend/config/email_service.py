@@ -35,9 +35,9 @@ class EmailService:
                 "Content-Type": "application/json"
             }
             
-            # Extract sender email (use Resend's test domain for now)
-            sender_email = "onboarding@resend.dev"  # Resend's test domain (no verification needed)
-            
+            # Use verified custom domain
+            sender_email = "noreply@techcarepro.me"
+                
             # Build recipient list
             to_emails = recipient_list if isinstance(recipient_list, list) else [recipient_list]
             
