@@ -12,7 +12,8 @@ class Command(BaseCommand):
                 email='admin@techcare.com',
                 password='Admin@123456',
                 first_name='Admin',
-                last_name='User'
+                last_name='User',
+                user_type='admin'
             )
             self.stdout.write(self.style.SUCCESS('Superuser "admin" created successfully!'))
             self.stdout.write(self.style.WARNING('Username: admin'))
