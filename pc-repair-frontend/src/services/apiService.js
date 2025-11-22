@@ -43,6 +43,7 @@ export const issuesAPI = {
   getPopularIssues: () => api.get('/issues/popular/'),
   getRecentIssues: () => api.get('/issues/recent/'),
   createIssue: (data) => api.post('/issues/resolved/create/', data),
+  deleteIssue: (id) => api.delete(`/issues/resolved/${id}/delete/`),
 };
 
 // AI Chat APIs

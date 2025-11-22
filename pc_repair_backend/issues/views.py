@@ -191,3 +191,22 @@ class RecentIssuesView(generics.ListAPIView):
     def get_queryset(self):
         limit = int(self.request.query_params.get('limit', 10))
         return ResolvedIssue.objects.all().order_by('-created_at')[:limit]
+
+
+class AdminDeleteIssueView(generics.DestroyAPIView):
+    """
+    API endpoint for admin to delete an issue from library
+    DELETE /api/issues/resolved/<id>/delete/
+    Admin only
+    """
+    queryset = ResolvedIssue.objects.all()
+    permission_classes = [IsAdminUser]
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        issue_title = instance.title
+        self.perform_destroy(instance)
+        
+        return Response({
+            'message': f'Issue "{issue_title}" has been deleted successfully from the library.'
+        }, status=status.HTTP_200_OK)

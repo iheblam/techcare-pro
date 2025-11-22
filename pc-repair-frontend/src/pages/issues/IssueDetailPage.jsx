@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   BookOpen, ThumbsUp, Eye, ArrowLeft, Lightbulb, 
-  CheckCircle, Calendar, Loader 
+  CheckCircle, Calendar, Loader, Trash2 
 } from 'lucide-react';
 import MainLayout from '../../components/layout/MainLayout';
 import Card from '../../components/common/Card';
@@ -16,11 +16,13 @@ import toast from 'react-hot-toast';
 
 const IssueDetailPage = () => {
   const { id } = useParams();
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [issue, setIssue] = useState(null);
   const [similarIssues, setSimilarIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [markingHelpful, setMarkingHelpful] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchIssueDetail();
@@ -63,6 +65,22 @@ const IssueDetailPage = () => {
       toast.error(handleApiError(error));
     } finally {
       setMarkingHelpful(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this issue from the library? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await issuesAPI.deleteIssue(id);
+      toast.success('Issue deleted successfully');
+      navigate('/issues');
+    } catch (error) {
+      toast.error(handleApiError(error));
+      setDeleting(false);
     }
   };
 
@@ -143,15 +161,28 @@ const IssueDetailPage = () => {
               </div>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={handleMarkHelpful}
-              loading={markingHelpful}
-              disabled={!isAuthenticated}
-            >
-              <ThumbsUp className="w-4 h-4 mr-2" />
-              Helpful
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleMarkHelpful}
+                loading={markingHelpful}
+                disabled={!isAuthenticated}
+              >
+                <ThumbsUp className="w-4 h-4 mr-2" />
+                Helpful
+              </Button>
+              
+              {user?.user_type === 'admin' && (
+                <Button
+                  variant="danger"
+                  onClick={handleDelete}
+                  loading={deleting}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
 

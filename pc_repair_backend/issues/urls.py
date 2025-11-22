@@ -7,7 +7,8 @@ from .views import (
     ResolvedIssueCreateView,
     SimilarIssuesView,
     PopularIssuesView,
-    RecentIssuesView
+    RecentIssuesView,
+    AdminDeleteIssueView
 )
 
 app_name = 'issues'
@@ -21,6 +22,7 @@ urlpatterns = [
     path('resolved/create/', ResolvedIssueCreateView.as_view(), name='resolved-create'),
     path('resolved/<int:pk>/', ResolvedIssueDetailView.as_view(), name='resolved-detail'),
     path('resolved/<int:pk>/helpful/', MarkIssueHelpfulView.as_view(), name='mark-helpful'),
+    path('resolved/<int:pk>/delete/', AdminDeleteIssueView.as_view(), name='admin-delete-issue'),
     
     # Discovery
     path('similar/', SimilarIssuesView.as_view(), name='similar'),
