@@ -30,7 +30,6 @@ class CreateTicketView(generics.CreateAPIView):
     1. Max 3 pending tickets at a time
     2. Max 5 tickets per day
     3. 10-minute cooldown between tickets
-    4. Must have at least one active chat session before creating ticket
     """
     serializer_class = CreateTicketSerializer
     permission_classes = [IsAuthenticated]
@@ -86,17 +85,6 @@ class CreateTicketView(generics.CreateAPIView):
                     'cooldown_remaining_seconds': int(remaining_seconds),
                     'can_create_at': (last_ticket.created_at + timedelta(minutes=cooldown_minutes)).isoformat()
                 }, status=status.HTTP_429_TOO_MANY_REQUESTS)
-        
-        # Check 4: Must have chat session (optional but recommended)
-        chat_session_id = request.data.get('chat_session')
-        if not chat_session_id:
-            from chat.models import ChatSession
-            has_chat = ChatSession.objects.filter(client=user).exists()
-            if not has_chat:
-                return Response({
-                    'warning': 'We recommend starting a chat with our AI assistant before creating a ticket. It might be able to help you immediately!',
-                    'suggest_chat': True
-                }, status=status.HTTP_400_BAD_REQUEST)
         
         # All checks passed, proceed with ticket creation
         serializer = self.get_serializer(data=request.data)
