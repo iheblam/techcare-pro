@@ -17,6 +17,15 @@ export const authAPI = {
   },
   changePassword: (data) => api.post('/auth/change-password/', data),
   applyTechnician: (data) => api.post('/auth/technician/apply/', data),
+  // Password Reset APIs
+  requestPasswordReset: (email) => api.post('/auth/password-reset/request/', { email }),
+  verifyResetToken: (token) => api.get(`/auth/password-reset/verify/?token=${token}`),
+  resetPassword: (token, newPassword, confirmPassword) => 
+    api.post('/auth/password-reset/confirm/', { 
+      token, 
+      new_password: newPassword, 
+      confirm_password: confirmPassword 
+    }),
   // Technician Application APIs
   submitTechnicianApplication: (data) => api.post('/auth/technician-application/submit/', data),
   getMyApplication: () => api.get('/auth/technician-application/my-application/'),
