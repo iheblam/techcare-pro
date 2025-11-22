@@ -17,6 +17,11 @@ from .admin_views import (
     AdminUserDetailView,
     AdminUserStatsView
 )
+from .password_reset_views import (
+    RequestPasswordResetView,
+    ResetPasswordView,
+    VerifyResetTokenView
+)
 
 app_name = 'accounts'
 
@@ -30,6 +35,11 @@ urlpatterns = [
     # User Profile
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
+    
+    # Password Reset
+    path('password-reset/request/', RequestPasswordResetView.as_view(), name='request_password_reset'),
+    path('password-reset/confirm/', ResetPasswordView.as_view(), name='reset_password'),
+    path('password-reset/verify/', VerifyResetTokenView.as_view(), name='verify_reset_token'),
     
     # Technician (old endpoint - keep for backward compatibility)
     path('technician/apply/', TechnicianApplicationView.as_view(), name='technician_apply'),

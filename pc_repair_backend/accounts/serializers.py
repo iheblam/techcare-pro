@@ -206,3 +206,38 @@ class ReviewApplicationSerializer(serializers.Serializer):
     """
     status = serializers.ChoiceField(choices=['approved', 'rejected'])
     admin_notes = serializers.CharField(required=False, allow_blank=True)
+
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    """
+    Serializer for requesting password reset
+    """
+    email = serializers.EmailField()
+    
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No account found with this email address.")
+        return value
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """
+    Serializer for resetting password with token
+    """
+    token = serializers.CharField()
+    new_password = serializers.CharField(
+        write_only=True,
+        validators=[validate_password],
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+    
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                "confirm_password": "Passwords do not match."
+            })
+        return attrs

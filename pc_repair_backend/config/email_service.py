@@ -799,3 +799,78 @@ The PC Repair Team
             recipient_list=[user.email],
             html_message=html_message
         )
+    
+    @staticmethod
+    def send_password_reset_email(user, reset_token):
+        """
+        Send password reset email with reset link
+        """
+        reset_url = f"https://techcare-pro.vercel.app/reset-password?token={reset_token.token}"
+        
+        subject = "Reset Your Password - TechCare Pro"
+        
+        message = f"""
+Hi {user.first_name},
+
+We received a request to reset your password for your TechCare Pro account.
+
+Click the link below to reset your password:
+{reset_url}
+
+This link will expire in 1 hour.
+
+If you didn't request a password reset, please ignore this email and your password will remain unchanged.
+
+Best regards,
+The TechCare Pro Team
+        """
+        
+        html_message = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+        .button {{ display: inline-block; padding: 12px 30px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+        .warning {{ background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> Password Reset Request</h1>
+        </div>
+        <div class="content">
+            <p>Hi <strong>{user.first_name}</strong>,</p>
+            
+            <p>We received a request to reset your password for your TechCare Pro account.</p>
+            
+            <p>Click the button below to reset your password:</p>
+            
+            <a href="{reset_url}" class="button">Reset Password</a>
+            
+            <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:<br>
+            <a href="{reset_url}">{reset_url}</a></p>
+            
+            <div class="warning">
+                <strong> Important:</strong> This link will expire in <strong>1 hour</strong>.
+            </div>
+            
+            <p style="color: #666;">If you didn't request a password reset, please ignore this email and your password will remain unchanged.</p>
+            
+            <p>Best regards,<br><strong>The TechCare Pro Team</strong></p>
+        </div>
+    </div>
+</body>
+</html>
+        """
+        
+        return EmailService.send_email(
+            subject=subject,
+            message=message,
+            recipient_list=[user.email],
+            html_message=html_message
+        )
