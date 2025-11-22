@@ -1,25 +1,18 @@
-import google.generativeai as genai
+from groq import Groq
 from django.conf import settings
 from .models import ChatSession, ChatMessage
 
-# Configure Gemini with your API key
-genai.configure(api_key=settings.GEMINI_API_KEY)
 
-
-class GeminiChatService:
+class AIChatService:
     """
-    Service class for handling Gemini AI interactions with fallback support
+    Service class for handling AI chat interactions using Groq
     """
     
     def __init__(self):
-        # Primary model: Gemini 2.0 Flash (experimental, fast)
-        self.primary_model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        # Fallback model: Also Gemini 2.0 Flash (same model, retry after cooldown)
-        self.fallback_model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        
-        # Track which model is currently in use
-        self.current_model = self.primary_model
-        self.model_name = 'gemini-2.0-flash-exp'
+        # Initialize Groq client
+        self.client = Groq(api_key=settings.GROQ_API_KEY)
+        # Use Llama 3.1 70B - excellent quality and generous free tier
+        self.model_name = 'llama-3.1-70b-versatile'
         
         # System instruction for PC repair assistant
         self.system_instruction = """You are an expert PC repair assistant helping users diagnose and fix computer problems.
@@ -48,9 +41,9 @@ Always end your initial message by asking what problem they're experiencing."""
         """
         Generate welcome message for new chat session
         """
-        welcome_message = f"""👋 Hello! I'm your AI PC repair assistant powered by Gemini.
+        welcome_message = """👋 Hello! I'm your AI PC repair assistant powered by Groq AI.
 
-I see you're having a **{issue_type}** problem. I'm here to help you diagnose and fix the issue!
+I see you're having a **{}** problem. I'm here to help you diagnose and fix the issue!
 
 To assist you better, please tell me:
 1. **What exactly is happening?** (Describe the problem)
@@ -58,13 +51,13 @@ To assist you better, please tell me:
 3. **Any error messages?** (Exact text if possible)
 4. **What have you tried so far?** (If anything)
 
-Please describe your issue in as much detail as possible, and I'll guide you through the troubleshooting steps! 💻"""
+Please describe your issue in as much detail as possible, and I'll guide you through the troubleshooting steps! 💻""".format(issue_type)
         
         return welcome_message
     
     def get_ai_response(self, session: ChatSession, user_message: str):
         """
-        Get response from Gemini based on conversation history
+        Get response from Groq AI based on conversation history
         
         Args:
             session: ChatSession object
@@ -80,10 +73,15 @@ Please describe your issue in as much detail as possible, and I'll guide you thr
             # Build conversation context from chat history
             conversation_context = self._build_conversation_context(session)
             
-            # Create the full prompt with context
-            full_prompt = f"""{self.system_instruction}
-
-ISSUE TYPE: {session.get_issue_type_display()}
+            # Prepare messages for Groq API
+            messages = [
+                {
+                    "role": "system",
+                    "content": self.system_instruction
+                },
+                {
+                    "role": "user",
+                    "content": f"""ISSUE TYPE: {session.get_issue_type_display()}
 
 CONVERSATION HISTORY:
 {conversation_context}
@@ -92,27 +90,20 @@ USER'S LATEST MESSAGE:
 {user_message}
 
 Your response (be helpful, clear, and step-by-step):"""
+                }
+            ]
             
-            # Try primary model first, fallback to secondary if quota exceeded
-            ai_response = None
-            try:
-                response = self.current_model.generate_content(full_prompt)
-                ai_response = response.text
-            except Exception as primary_error:
-                error_str = str(primary_error)
-                
-                # Check if it's a quota/rate limit error (429 or quota exceeded)
-                if "429" in error_str or "quota" in error_str.lower() or "rate limit" in error_str.lower():
-                    # Quota exceeded - inform user with detailed error
-                    print(f"GEMINI QUOTA ERROR: {error_str[:200]}")
-                    raise Exception(f"AI quota exceeded. Error details: {error_str[:150]}... Please try again later or speak with a technician.")
-                else:
-                    # Non-quota error, re-raise with details
-                    print(f"GEMINI API ERROR: {error_str[:200]}")
-                    raise primary_error
+            # Get response from Groq
+            chat_completion = self.client.chat.completions.create(
+                messages=messages,
+                model=self.model_name,
+                temperature=0.7,
+                max_tokens=1024,
+                top_p=1,
+                stream=False,
+            )
             
-            if not ai_response:
-                raise Exception("Unable to generate response")
+            ai_response = chat_completion.choices[0].message.content
             
             # Check if AI recommends escalation
             should_escalate = "ESCALATE_TO_TECHNICIAN" in ai_response
@@ -140,7 +131,7 @@ Your response (be helpful, clear, and step-by-step):"""
     
     def _build_conversation_context(self, session: ChatSession, max_messages=5):
         """
-        Build conversation context from recent messages (reduced to save tokens)
+        Build conversation context from recent messages (limited to save tokens)
         
         Args:
             session: ChatSession object
@@ -178,14 +169,25 @@ Your response (be helpful, clear, and step-by-step):"""
             if not conversation or conversation == "No previous conversation.":
                 return "User requested technician assistance without providing problem details."
             
-            prompt = f"""Based on this conversation between a user and a PC repair assistant, provide a concise technical summary (2-3 sentences maximum) of the user's problem:
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"""Based on this conversation between a user and a PC repair assistant, provide a concise technical summary (2-3 sentences maximum) of the user's problem:
 
 {conversation}
 
 Technical Summary:"""
+                }
+            ]
             
-            response = self.current_model.generate_content(prompt)
-            return response.text.strip()
+            chat_completion = self.client.chat.completions.create(
+                messages=messages,
+                model=self.model_name,
+                temperature=0.5,
+                max_tokens=150,
+            )
+            
+            return chat_completion.choices[0].message.content.strip()
             
         except Exception as e:
             return f"Unable to generate summary. Conversation available in chat history. Error: {str(e)}"
@@ -199,36 +201,8 @@ Technical Summary:"""
         """
         return {
             'current_model': self.model_name,
-            'is_fallback': self.current_model == self.fallback_model
+            'provider': 'Groq'
         }
-    
-    def reset_to_primary_model(self):
-        """
-        Reset to primary model (useful after quota cooldown)
-        """
-        self.current_model = self.primary_model
-        self.model_name = 'gemini-1.5-flash'
-        print("Reset to primary model: gemini-1.5-flash")
-    
-    def get_model_status(self):
-        """
-        Get current model status
-        
-        Returns:
-            dict: Current model information
-        """
-        return {
-            'current_model': self.model_name,
-            'is_fallback': self.current_model == self.fallback_model
-        }
-    
-    def reset_to_primary_model(self):
-        """
-        Reset to primary model (useful after quota cooldown)
-        """
-        self.current_model = self.primary_model
-        self.model_name = 'gemini-2.0-flash-exp'
-        print("Reset to primary model: gemini-2.0-flash-exp")
     
     def suggest_solution_from_library(self, user_problem: str):
         """

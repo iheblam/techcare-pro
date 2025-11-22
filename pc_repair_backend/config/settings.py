@@ -241,8 +241,8 @@ try:
 except ImportError:
     pass  # Use default storage for local dev
 
-# Gemini AI Configuration
-GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+# AI Configuration
+GROQ_API_KEY = config('GROQ_API_KEY', default='')
 
 # Security Settings for Production
 if not DEBUG:

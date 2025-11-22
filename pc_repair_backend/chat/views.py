@@ -11,7 +11,7 @@ from .serializers import (
     SendMessageSerializer,
     ChatMessageSerializer
 )
-from .gemini_service import GeminiChatService
+from .ai_service import AIChatService
 from issues.models import ResolvedIssue, IssueCategory
 
 
@@ -34,11 +34,11 @@ class StartChatSessionView(generics.CreateAPIView):
         # Create the chat session
         session = serializer.save(client=request.user)
         
-        # Initialize Gemini service
-        gemini_service = GeminiChatService()
+        # Initialize AI service
+        ai_service = AIChatService()
         
-        # Get welcome message from Gemini
-        welcome_message = gemini_service.start_chat_session(
+        # Get welcome message from AI
+        welcome_message = ai_service.start_chat_session(
             session.id,
             session.get_issue_type_display()
         )
@@ -126,9 +126,9 @@ class SendMessageView(APIView):
             attachment=attachment
         )
         
-        # Get AI response using Gemini
-        gemini_service = GeminiChatService()
-        ai_result = gemini_service.get_ai_response(session, user_message_text)
+        # Get AI response
+        ai_service = AIChatService()
+        ai_result = ai_service.get_ai_response(session, user_message_text)
         
         # Save AI's response
         ai_message = ChatMessage.objects.create(
@@ -141,7 +141,7 @@ class SendMessageView(APIView):
         if ai_result['should_escalate'] and session.status == 'active':
             session.status = 'escalated'
             # Generate problem summary for potential ticket creation
-            session.problem_summary = gemini_service.generate_problem_summary(session)
+            session.problem_summary = ai_service.generate_problem_summary(session)
             session.save()
         
         # Return both messages and session status
