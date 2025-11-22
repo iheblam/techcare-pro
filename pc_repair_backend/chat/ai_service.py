@@ -11,8 +11,8 @@ class AIChatService:
     def __init__(self):
         # Initialize Groq client
         self.client = Groq(api_key=settings.GROQ_API_KEY)
-        # Use Llama 3.1 70B - excellent quality and generous free tier
-        self.model_name = 'llama-3.1-70b-versatile'
+        # Use Llama 3.3 70B - latest stable model with excellent quality
+        self.model_name = 'llama-3.3-70b-versatile'
         
         # System instruction for PC repair assistant
         self.system_instruction = """You are an expert PC repair assistant helping users diagnose and fix computer problems.
